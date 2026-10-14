@@ -1,0 +1,37 @@
+{
+  "referencia": "2026-10-14",
+  "input": "resultados_agro_v7.zip",
+  "series": 31,
+  "observacoes": 3926,
+  "preco_atacado": 2408,
+  "preco_varejo": 1518,
+  "pares_completos": 1399,
+  "pares_sem_anomalias": 1398,
+  "origens": {
+    "Companhia Nacional de Abastecimento (Conab)": 31
+  },
+  "series_defasadas_4m": 15,
+  "series_com_campo_auxiliar_Retail_para_atacado": 19,
+  "meses_faltantes_dentro_das_series": 120,
+  "outliers_suspeitos": 1,
+  "produtos": {
+    "Feijão-preto": 8,
+    "Milho amarelo": 5,
+    "Arroz beneficiado tipo 1": 8,
+    "Trigo em grão": 2,
+    "Farinha de trigo": 8
+  },
+  "intervalo": [
+    "2014-01-01",
+    "2026-09-01"
+  ],
+  "criterios": [
+    "Moeda BRL e unidade kg",
+    "Tipo de preço por price_type e não market_type",
+    "Preço original preservado",
+    "Índice nominal base média 2020=100 por série (>=6 meses em 2020)",
+    "Diferencial sem outlier, não equivale a lucro",
+    "Séries com >=4 meses de defasagem sinalizadas",
+    "Licença deve ser verificada para redistribuição/comercialização"
+  ]
+}

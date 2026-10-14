@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.env
+.env.*
+!.env.example
+.ipynb_checkpoints/
+.DS_Store
+# Dados reais, saídas derivadas e bancos de dados fora do Git por licença e volume
+/data/private/**
+!/data/private/.gitkeep
+/data/processed/**
+*.sqlite
+*.sqlite-journal
+*.db
+# Arquivos Excel/csv gerados temporariamente
+/build/
+/dist/

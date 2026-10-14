@@ -1,0 +1,20 @@
+{
+  "resultado": "APROVADO_ESTRUTURALMENTE",
+  "observacoes": 3926,
+  "series": 31,
+  "pares": 1399,
+  "atacado": 2408,
+  "varejo": 1518,
+  "pares_varejo_menor_atacado": 89,
+  "series_defasadas_4m": 15,
+  "alertas_por_tipo": {
+    "SERIE_DEFASADA": 15,
+    "METADADOS_MERCADO_TIPO": 19,
+    "LACUNAS_INTERNAS": 9,
+    "OUTLIER_SUSPEITO": 1
+  },
+  "sqlite_integrity": "ok",
+  "tabelas_sqlite": 14,
+  "falhas": [],
+  "advertencia": "Validação estrutural, não valida preços, metodologia, representatividade ou licença."
+}
