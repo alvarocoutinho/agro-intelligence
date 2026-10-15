@@ -7,16 +7,33 @@ contém várias séries, o resumo não mostra um valor único arbitrário.
 
 ## Iniciar
 
+No Bash, a partir da raiz do repositório:
+
 ```bash
 python3 -m pip install -r requirements-web.txt
-AGRO_V8_SQLITE=data/private/agro_integrado_v8.sqlite PYTHONPATH=src python3 -m uvicorn agro.webapp:app --host 127.0.0.1 --port 8000
-curl -f http://127.0.0.1:8000/api/sources
+PYTHONPATH=src python3 -m uvicorn agro.webapp:app --host 127.0.0.1 --port 8000
 ```
 
-O arquivo `data/private/agro_integrado_v8.sqlite` é extraído do ZIP V8 autorizado e
-permanece fora do Git. Sem `AGRO_V8_SQLITE`, a interface inicia na amostra sintética;
-com o banco disponível, abre na V8. Execute localmente até concluir a revisão das
-licenças antes de expor o servidor publicamente.
+No PowerShell do Windows, a partir da raiz do repositório:
+
+```powershell
+python3 -m pip install -r requirements-web.txt
+$env:PYTHONPATH = "src"
+python3 -m uvicorn agro.webapp:app --host 127.0.0.1 --port 8000
+```
+
+Abra `http://127.0.0.1:8000/`. Sem `AGRO_V8_SQLITE`, a interface inicia na
+amostra sintética. O SQLite V8 privado não está no ZIP do GitHub. Para abrir com
+a V8, extraia `agro_integrado_v8.sqlite` do ZIP V8 autorizado para `data/private/`
+e configure a variável antes de iniciar o servidor:
+
+```powershell
+$env:AGRO_V8_SQLITE = "data/private/agro_integrado_v8.sqlite"
+```
+
+No Bash, use `export AGRO_V8_SQLITE=data/private/agro_integrado_v8.sqlite`.
+Execute localmente até concluir a revisão das licenças antes de expor o servidor
+publicamente.
 
 `GET /api/sources` informa quais fontes estão habilitadas.
 `GET /api/observations/{id}` devolve `source`, `observations` e `fetched_at`. Cada observação

@@ -39,9 +39,19 @@ O código da V6/V7 usa `pandas`, `numpy`, `requests`; revisar antes de reinstala
 
 ## Webapp de exploração
 
+No Bash:
+
 ```bash
 python3 -m pip install -r requirements-web.txt
-PYTHONPATH=src python3 -m uvicorn agro.webapp:app --host 0.0.0.0 --port 8000
+PYTHONPATH=src python3 -m uvicorn agro.webapp:app --host 127.0.0.1 --port 8000
+```
+
+No PowerShell do Windows:
+
+```powershell
+python3 -m pip install -r requirements-web.txt
+$env:PYTHONPATH = "src"
+python3 -m uvicorn agro.webapp:app --host 127.0.0.1 --port 8000
 ```
 
 Abra `http://localhost:8000`. A primeira tela usa somente dados sintéticos, identificados
