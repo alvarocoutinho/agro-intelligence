@@ -46,7 +46,8 @@ def audit(path):
             'resultado':'APROVADO_ESTRUTURALMENTE' if not violations else 'REVISAR',
             'observacoes':len(precos),'series':len(series),'pares':len(pares),
             'atacado':tipos['ATACADO'],'varejo':tipos['VAREJO'],
-            'pares_varejo_menor_atacado':sum(1 for r in pares if float(r['diferenca_pct_sobre_atacado'])<0),
+            'pares_varejo_menor_atacado':sum(1 for r in pares
+                if r['diferenca_pct_sobre_atacado'] and float(r['diferenca_pct_sobre_atacado'])<0),
             'series_defasadas_4m':sum(int(r['serie_defasada_4m']) for r in series),
             'alertas_por_tipo':dict(Counter(r['tipo'] for r in alertas)),
             'sqlite_integrity':integrity,'tabelas_sqlite':len(tables),

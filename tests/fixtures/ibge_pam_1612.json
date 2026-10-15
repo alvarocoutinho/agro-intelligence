@@ -1,0 +1,20 @@
+[
+  {
+    "id": "214",
+    "variavel": "Quantidade produzida",
+    "unidade": "Toneladas",
+    "resultados": [
+      {
+        "classificacoes": [
+          {"id": "81", "nome": "Produto das lavouras temporárias", "categoria": {"2710": "Soja (em grão)"}}
+        ],
+        "series": [
+          {
+            "localidade": {"id": "1", "nome": "Brasil"},
+            "serie": {"2024": "1000", "2025": "-"}
+          }
+        ]
+      }
+    ]
+  }
+]

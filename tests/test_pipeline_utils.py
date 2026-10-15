@@ -15,8 +15,9 @@ class TestPipelineUtilities(unittest.TestCase):
         self.assertEqual(p.fix(Decimal('1.6666666'), 3), '1.667')
     def test_months_between(self):
         self.assertEqual(p.months_between('2026-01-01','2026-03-01'), 3)
-    def test_reference_is_hardcoded_in_legacy_baseline(self):
-        # Test is deliberately a baseline check. Replace with reference injection during P0 refactor.
-        self.assertEqual(p.REFERENCIA, date(2026,10,14))
+    def test_reference_defaults_to_baseline_manifest(self):
+        self.assertEqual(p.baseline_reference(), date(2026,10,14))
+        self.assertEqual(p.monthdist('2026-06-01', date(2026,10,14)), 4)
+        self.assertEqual(p.monthdist('2026-06-01', date(2026,9,1)), 3)
 
 if __name__ == '__main__': unittest.main()

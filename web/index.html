@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Agro Intelligence</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Fontes de dados">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">AI</span><div><strong>Agro Intelligence</strong><small>Observatório de dados</small></div></div>
+      <nav id="source-nav" aria-label="Selecionar fonte"></nav>
+      <div class="sidebar-footer">Fontes e unidades permanecem identificadas em cada observação.</div>
+    </aside>
+
+    <main class="main-content">
+      <header class="page-header">
+        <div class="title-block"><p class="eyebrow" id="source-group">EXPLORAR</p><h1 id="source-title">Amostra sintética</h1><p class="subtitle" id="source-subtitle"></p></div>
+        <div class="header-actions"><span class="source-badge" id="source-badge">SINTÉTICO</span><button class="icon-button" id="refresh-button" type="button" title="Atualizar dados" aria-label="Atualizar dados">↻</button></div>
+      </header>
+
+      <div id="notice" class="notice" role="status" hidden></div>
+
+      <section class="filter-band" aria-label="Filtros">
+        <label>Produto<select id="product-filter"></select></label>
+        <label>Localidade<select id="location-filter"></select></label>
+        <label>Etapa<select id="stage-filter"></select></label>
+        <label>Período<select id="range-filter"><option value="all">Todo o período</option><option value="12">Últimos 12 meses</option><option value="36">Últimos 36 meses</option></select></label>
+      </section>
+
+      <section class="summary-band" aria-label="Resumo da seleção">
+        <div class="summary-item"><span>Último valor</span><strong id="latest-value">—</strong><small id="latest-detail">—</small></div>
+        <div class="summary-item"><span>Último período</span><strong id="latest-date">—</strong><small id="date-detail">—</small></div>
+        <div class="summary-item"><span>Observações</span><strong id="observation-count">—</strong><small id="count-detail">—</small></div>
+      </section>
+
+      <section class="data-section" aria-labelledby="chart-title">
+        <div class="section-heading"><div><p class="eyebrow">SÉRIE TEMPORAL</p><h2 id="chart-title">Evolução</h2></div><div id="chart-legend" class="chart-legend"></div></div>
+        <div class="chart-wrap"><svg id="chart" viewBox="0 0 960 360" preserveAspectRatio="none" role="img" aria-label="Gráfico temporal dos dados filtrados"></svg><div id="chart-tooltip" class="chart-tooltip" hidden></div></div>
+        <p class="chart-footnote" id="chart-footnote"></p>
+      </section>
+
+      <section class="data-section table-section" aria-labelledby="table-title">
+        <div class="section-heading"><div><p class="eyebrow">REGISTROS</p><h2 id="table-title">Observações</h2></div><button id="download-button" class="command-button" type="button">↓ Exportar CSV</button></div>
+        <div class="table-scroll"><table><thead><tr><th>Período</th><th>Produto</th><th>Localidade</th><th>Etapa</th><th class="numeric">Valor</th><th>Qualidade</th></tr></thead><tbody id="observation-rows"></tbody></table></div>
+        <div class="table-bottom"><span id="table-count"></span><button id="more-button" class="text-button" type="button" hidden>Mostrar mais</button></div>
+      </section>
+
+      <footer class="provenance"><div><strong>Fonte e metodologia</strong><p id="source-note"></p></div><a id="source-link" target="_blank" rel="noopener noreferrer" hidden>Ver API oficial ↗</a></footer>
+    </main>
+  </div>
+</body>
+</html>

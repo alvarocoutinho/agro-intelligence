@@ -2,12 +2,19 @@
 
 ## P0 — Engenharia e reprodutibilidade
 
-- [ ] Ler resultados V8 e reproduzir baseline localmente.
-- [ ] Substituir `REFERENCIA = date(2026,10,14)` por referência parametrizável, preservando a data de referência da auditoria.
-- [ ] Remover asserts fixos `31` e `3926`, usando checagens estruturais e tolerância a novas observações.
-- [ ] Persistir SQLite com tipos de dados corretos, restrições de unicidade e documentação de schema.
-- [ ] Criar testes para unidades, falta de observações, dados repetidos, outliers e preços negativos.
+- [x] Ler resultados V8 e comparar a auditoria estrutural com a baseline.
+- [ ] Reproduzir a geração V8 a partir do ZIP V7 original.
+- [x] Substituir `REFERENCIA = date(2026,10,14)` por referência parametrizável, preservando a data de referência da auditoria.
+- [x] Remover asserts fixos `31` e `3926`, usando checagens estruturais e tolerância a novas observações.
+- [x] Persistir SQLite V8 com contagens/flags inteiras, chaves de unicidade e documentação de schema.
+- [x] Criar testes offline para unidades, falta de observações, dados repetidos, outliers e preços negativos.
 - [ ] Adicionar Makefile/comandos `test`, `audit`, `collect`, `build`.
+
+A refatoração foi validada com ZIP sintético e auditoria estrutural da saída. A reprodução
+da baseline a partir do ZIP V7 original permanece pendente. O ZIP V8 enviado foi
+aprovado na auditoria estrutural, com 31 séries e 3.926 observações. O schema SQLite V8 preserva valores decimais exatos como `TEXT`;
+tipos inteiros e chaves primárias estão descritos em `docs/SCHEMA_V8.md`. O schema
+legado V7 ainda precisa de revisão separada.
 
 ## P1 — Fontes brasileiras essenciais
 
@@ -30,6 +37,12 @@
 - [ ] API interna read-only (FastAPI) e dashboard (Streamlit ou frontend), após pipeline estabilizado.
 - [ ] Processos agendados e painel de saúde dos conectores.
 - [ ] Teste de licenciamento/termos de redistribuição por fonte e rota.
+
+Um primeiro webapp read-only já explora dados sintéticos e V8 local opt-in, com conectores
+BCB SGS 1 e IBGE PAM 1612 testados por fixtures. A consulta real a BCB/IBGE ainda depende
+de liberação dos domínios no ambiente cloud e validação de resposta ao vivo. MDIC,
+CONAB produtor/custos, FAO ao vivo, atualização agendada e revisão de licenças seguem
+pendentes antes de considerar o produto completo.
 
 ## Foco funcional
 

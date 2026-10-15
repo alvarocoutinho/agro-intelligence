@@ -8,7 +8,7 @@ from datetime import date
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from pathlib import Path
 
-REFERENCIA = date(2026, 10, 14)
+BASELINE_MANIFEST = Path(__file__).resolve().parents[2] / 'docs' / 'baseline_v8.json'
 EXPECTED = ['fao_precos_auditados_v7.csv','fao_tipos_preco_e_fontes_v7.csv','fao_series_metadata_raw_v7.json','fao_cobertura_series_v7.csv','resumo_metadados_fao_v7.json','resumo_qualidade_v7.json']
 PRODUTO = {
  'Wheat (flour)': 'Farinha de trigo',
@@ -18,6 +18,27 @@ PRODUTO = {
  'Wheat': 'Trigo em grão',
 }
 REGIAO = {'Federal District': 'Distrito Federal'}
+PAIR_FIELDS = ['produto','regiao','data','uuid_atacado','uuid_varejo','atacado_brl_kg',
+               'varejo_brl_kg','diferenca_brl_kg','diferenca_pct_sobre_atacado',
+               'status_comparacao','nota']
+STATS_FIELDS = ['produto','ano','n_pares','mediana_diferencial_pct',
+                'media_diferencial_pct','min_diferencial_pct','max_diferencial_pct','interpretacao']
+ALERT_FIELDS = ['tipo','uuid','produto','regiao','data','detalhe']
+SQLITE_INTEGER_FIELDS = {
+    'fao_precos_normalizados_v8': {'meses_base_2020','meses_defasagem_serie','serie_defasada_4m','flag_outlier'},
+    'fao_series_classificadas_v8': {'campos_auxiliares_divergentes','observacoes','meses_ausentes_internos',
+                                   'defasagem_meses','serie_defasada_4m','meses_base_2020'},
+    'fao_pares_atacado_varejo_v8': set(),
+    'fao_resumo_diferenciais_v8': {'ano','n_pares'},
+    'alertas_qualidade_v8': set(),
+}
+SQLITE_KEYS = {
+    'fao_precos_normalizados_v8': ('uuid','data'),
+    'fao_series_classificadas_v8': ('uuid',),
+    'fao_pares_atacado_varejo_v8': ('produto','regiao','data'),
+    'fao_resumo_diferenciais_v8': ('produto','ano'),
+    'alertas_qualidade_v8': ('tipo','uuid','data'),
+}
 
 def dec(x):
     try: return Decimal(str(x).strip())
@@ -36,8 +57,11 @@ def write_csv(path,rows,fields):
         w=csv.DictWriter(f, fieldnames=fields, extrasaction='ignore', delimiter=',')
         w.writeheader();w.writerows(rows)
 
-def monthdist(s):
-    dt=date.fromisoformat(s[:10]);return (REFERENCIA.year-dt.year)*12+REFERENCIA.month-dt.month
+def baseline_reference():
+    return date.fromisoformat(json.loads(BASELINE_MANIFEST.read_text(encoding='utf-8'))['referencia'])
+
+def monthdist(s, reference_date):
+    dt=date.fromisoformat(s[:10]);return (reference_date.year-dt.year)*12+reference_date.month-dt.month
 
 def months_between(st,en):
     a=date.fromisoformat(st[:10]);b=date.fromisoformat(en[:10]);return (b.year-a.year)*12+b.month-a.month+1
@@ -45,7 +69,8 @@ def months_between(st,en):
 def read_bytes_zip(zf,name):
     with zf.open(name) as f:return f.read()
 
-def main(zip_path, out_dir):
+def main(zip_path, out_dir, reference_date=None):
+    if reference_date is None: reference_date=baseline_reference()
     out=Path(out_dir);out.mkdir(parents=True,exist_ok=True)
     with zipfile.ZipFile(zip_path) as z:
         files={Path(x).name:x for x in z.namelist() if not x.endswith('/')}
@@ -59,9 +84,14 @@ def main(zip_path, out_dir):
             with open(out/'agro_integrado_v8.sqlite','wb') as w:w.write(read_bytes_zip(z,dbname))
     byid={r['uuid']:r for r in metas}
     bycoverage={r['uuid']:r for r in cobertura}
-    assert len(byid)==len(metas)==31, 'Esperadas 31 séries distintas'
-    assert len(prices)==3926, 'Quantidade mudou; revalidar regras do V8 antes de processar'
+    if not prices or not metas: raise ValueError('Preços e metadados de séries são obrigatórios')
+    if len(byid)!=len(metas): raise ValueError('UUID duplicado nos metadados das séries')
+    if len(bycoverage)!=len(cobertura): raise ValueError('UUID duplicado na cobertura das séries')
     if len({(r['uuid'],r['data']) for r in prices})!=len(prices):raise ValueError('Duplicatas (uuid,data) detectadas')
+    missing_meta={r['uuid'] for r in prices}-byid.keys()
+    missing_coverage=set(byid)-bycoverage.keys()
+    if missing_meta: raise ValueError('Séries sem metadados: '+', '.join(sorted(missing_meta)))
+    if missing_coverage: raise ValueError('Séries sem cobertura: '+', '.join(sorted(missing_coverage)))
     # Base 2020 média aritmética mensal para índices NOMINAIS; não representa inflação real.
     base2020=defaultdict(list)
     for r in prices:
@@ -96,8 +126,8 @@ def main(zip_path, out_dir):
             'meses_base_2020':len([v for v in prices if v['uuid']==uuid and v['data'].startswith('2020-')]),
             'status_qualidade':status,'flag_outlier':int(flag),
             'data_ultima_serie':cov['data_fim'],
-            'meses_defasagem_serie':monthdist(cov['data_fim']),
-            'serie_defasada_4m':int(monthdist(cov['data_fim'])>=4),
+            'meses_defasagem_serie':monthdist(cov['data_fim'],reference_date),
+            'serie_defasada_4m':int(monthdist(cov['data_fim'],reference_date)>=4),
             'status_licenca':'REVISAR_TERMOS_FAO_E_FONTE_TERCEIROS',
             'url_origem_api':'https://fpma.fao.org/giews/v4/global/price_module/api/v1/FpmaSeriePrice/',
         }
@@ -116,8 +146,8 @@ def main(zip_path, out_dir):
           'codigo_produto_fao':raw.get('commodity_code',''),
           'unidade_original':c['unidade_original'], 'data_inicio':c['data_inicio'], 'data_fim':c['data_fim'],
           'observacoes':int(c['observacoes']),'meses_ausentes_internos':int(c['meses_ausentes_internos']),
-          'cobertura_pct':c['cobertura_pct'],'defasagem_meses':monthdist(c['data_fim']),
-          'serie_defasada_4m':int(monthdist(c['data_fim'])>=4),
+          'cobertura_pct':c['cobertura_pct'],'defasagem_meses':monthdist(c['data_fim'],reference_date),
+          'serie_defasada_4m':int(monthdist(c['data_fim'],reference_date)>=4),
           'meses_base_2020':sum(1 for r in prices if r['uuid']==uuid and r['data'].startswith('2020-')),
           'licenca':'FAO_CONDICIONAL_VERIFICAR_TERCEIROS',
           'observacoes_uso':'Preços de comercialização, não representam preços ao produtor'})
@@ -139,7 +169,8 @@ def main(zip_path, out_dir):
            'diferenca_pct_sobre_atacado':fix((vb/va-1)*100,3) if va and vb else '',
            'status_comparacao':'ANOMALIA_NAO_USAR_EM_AGREGADOS' if not good else 'AMOSTRA_COMPARAVEL',
            'nota':'Diferencial de preços; NÃO é margem de lucro, nem preço na fazenda'})
-    cols_paired=list(paired[0]);write_csv(out/'fao_pares_atacado_varejo_v8.csv',paired,cols_paired)
+    cols_paired=list(paired[0]) if paired else PAIR_FIELDS
+    write_csv(out/'fao_pares_atacado_varejo_v8.csv',paired,cols_paired)
     # Estatísticas somente da amostra pareada, sem inferência nacional e sem outliers.
     sam=defaultdict(list)
     for p in paired:
@@ -151,7 +182,8 @@ def main(zip_path, out_dir):
          'media_diferencial_pct':round(statistics.mean(v),2),
          'min_diferencial_pct':round(min(v),2),'max_diferencial_pct':round(max(v),2),
          'interpretacao':'Diferença varejo/atacado em amostra regional; não é margem nem média nacional'})
-    cols_stats=list(stats[0]);write_csv(out/'fao_resumo_diferenciais_v8.csv',stats,cols_stats)
+    cols_stats=list(stats[0]) if stats else STATS_FIELDS
+    write_csv(out/'fao_resumo_diferenciais_v8.csv',stats,cols_stats)
 
     alert=[]
     for s in serie:
@@ -168,22 +200,34 @@ def main(zip_path, out_dir):
         if p['flag_outlier']:
             alert.append({'tipo':'OUTLIER_SUSPEITO','uuid':p['uuid'],'produto':p['produto'],
                           'regiao':p['regiao'],'data':p['data'],'detalhe':'Manter valor original e investigar na fonte'})
-    cols_alert=list(alert[0]);write_csv(out/'alertas_qualidade_v8.csv',alert,cols_alert)
+    cols_alert=list(alert[0]) if alert else ALERT_FIELDS
+    write_csv(out/'alertas_qualidade_v8.csv',alert,cols_alert)
 
-    # Banco V7 herdado + quatro tabelas V8, preservando origem e versão legada.
+    # Banco V7 herdado + cinco tabelas V8, preservando origem e versão legada.
     db=out/'agro_integrado_v8.sqlite'
     if not db.exists(): sqlite3.connect(db).close()
     with sqlite3.connect(db) as cn:
-        for name,entries in [('fao_precos_normalizados_v8',normalized),('fao_series_classificadas_v8',serie),
-                             ('fao_pares_atacado_varejo_v8',paired),('fao_resumo_diferenciais_v8',stats),('alertas_qualidade_v8',alert)]:
-            cols=list(entries[0]);cn.execute('DROP TABLE IF EXISTS '+name)
-            cn.execute('CREATE TABLE '+name+' ('+','.join('"'+c+'" TEXT' for c in cols)+')')
-            cn.executemany('INSERT INTO '+name+' VALUES ('+','.join('?'*len(cols))+')',[[str(x[c]) for c in cols] for x in entries])
-        cn.execute('CREATE INDEX IF NOT EXISTS idx_precos_v8_uuid_data ON fao_precos_normalizados_v8(uuid,data)')
+        tables = [
+            ('fao_precos_normalizados_v8',normalized,cols_prices),
+            ('fao_series_classificadas_v8',serie,cols_series),
+            ('fao_pares_atacado_varejo_v8',paired,cols_paired),
+            ('fao_resumo_diferenciais_v8',stats,cols_stats),
+            ('alertas_qualidade_v8',alert,cols_alert),
+        ]
+        for name,entries,cols in tables:
+            numeric=SQLITE_INTEGER_FIELDS[name]
+            definitions=[f'"{col}" {"INTEGER" if col in numeric else "TEXT"}' for col in cols]
+            key=','.join(f'"{col}"' for col in SQLITE_KEYS[name])
+            cn.execute(f'DROP TABLE IF EXISTS "{name}"')
+            cn.execute(f'CREATE TABLE "{name}" ({",".join(definitions)}, PRIMARY KEY ({key})) WITHOUT ROWID')
+            fields=','.join(f'"{col}"' for col in cols)
+            placeholders=','.join('?' for _ in cols)
+            cn.executemany(f'INSERT INTO "{name}" ({fields}) VALUES ({placeholders})',
+                           [[int(row[col]) if col in numeric else str(row[col]) for col in cols]
+                            for row in entries])
         cn.execute('CREATE INDEX IF NOT EXISTS idx_precos_v8_tipo ON fao_precos_normalizados_v8(tipo_preco,produto,regiao,data)')
-        cn.execute('CREATE INDEX IF NOT EXISTS idx_pares_v8 ON fao_pares_atacado_varejo_v8(produto,regiao,data)')
     r={
-      'referencia':'2026-10-14','input':Path(zip_path).name,
+      'referencia':reference_date.isoformat(),'input':Path(zip_path).name,
       'series':len(serie),'observacoes':len(normalized),'preco_atacado':sum(x['tipo_preco']=='ATACADO' for x in normalized),
       'preco_varejo':sum(x['tipo_preco']=='VAREJO' for x in normalized),
       'pares_completos':len(paired),'pares_sem_anomalias':sum(p['status_comparacao']=='AMOSTRA_COMPARAVEL' for p in paired),
@@ -201,10 +245,16 @@ def main(zip_path, out_dir):
     (out/'resumo_v8.json').write_text(json.dumps(r,ensure_ascii=False,indent=2),encoding='utf8')
     # Auditoria de invariantes de integridade.
     with sqlite3.connect(db) as cn:
-        assert cn.execute('select count(*) from fao_precos_normalizados_v8').fetchone()[0]==3926
-        assert cn.execute('select count(*) from fao_pares_atacado_varejo_v8').fetchone()[0]==len(paired)
+        for table, expected_count in [('fao_precos_normalizados_v8',len(normalized)),
+                                      ('fao_pares_atacado_varejo_v8',len(paired))]:
+            count=cn.execute('select count(*) from '+table).fetchone()[0]
+            if count!=expected_count: raise RuntimeError(f'{table}: {count} linhas no banco; {expected_count} geradas')
+        if cn.execute('PRAGMA integrity_check').fetchone()[0]!='ok':
+            raise RuntimeError('Falha na integridade do SQLite V8')
     return r
 
 if __name__=='__main__':
     ap=argparse.ArgumentParser();ap.add_argument('zip_input');ap.add_argument('--output',default='resultados_agro_v8')
-    args=ap.parse_args();print(json.dumps(main(args.zip_input,args.output),ensure_ascii=False,indent=2))
+    ap.add_argument('--reference-date',type=date.fromisoformat,default=None,metavar='YYYY-MM-DD',
+                    help='Data para calcular defasagem; padrão: referência em docs/baseline_v8.json')
+    args=ap.parse_args();print(json.dumps(main(args.zip_input,args.output,args.reference_date),ensure_ascii=False,indent=2))

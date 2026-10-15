@@ -1,0 +1,22 @@
+[
+  {"date":"2026-01-01","value":8.4,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-01-01","value":10.1,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-02-01","value":8.7,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-02-01","value":10.4,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-03-01","value":8.3,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-03-01","value":10.0,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-04-01","value":8.1,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-04-01","value":9.9,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-05-01","value":8.6,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-05-01","value":10.3,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-06-01","value":9.0,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-06-01","value":10.7,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-07-01","value":9.4,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-07-01","value":11.2,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-08-01","value":9.2,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-08-01","value":11.0,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-09-01","value":9.8,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-09-01","value":11.5,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"},
+  {"date":"2026-10-01","value":10.0,"product":"Feijão-preto","location":"Praça sintética","stage":"ATACADO","quality":"SINTETICO"},
+  {"date":"2026-10-01","value":11.8,"product":"Feijão-preto","location":"Praça sintética","stage":"VAREJO","quality":"SINTETICO"}
+]

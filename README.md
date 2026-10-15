@@ -30,7 +30,25 @@ python scripts/audit_v8.py --input data/private/resultados_agro_v8.zip
 python src/agro/pipeline_v8.py data/private/resultados_agro_v7.zip --output data/private/reprocessado_v8
 ```
 
+O pipeline usa por padrão a data de referência de `docs/baseline_v8.json`. Para uma nova rodada,
+informe `--reference-date YYYY-MM-DD`. A auditoria do ZIP original exige o arquivo privado;
+os testes offline geram uma amostra sintética. Consulte [execução e armazenamento V8](docs/EXECUCAO_V8.md)
+para empacotar e auditar a saída reprocessada.
+
 O código da V6/V7 usa `pandas`, `numpy`, `requests`; revisar antes de reinstalar dependências.
+
+## Webapp de exploração
+
+```bash
+python3 -m pip install -r requirements-web.txt
+PYTHONPATH=src python3 -m uvicorn agro.webapp:app --host 0.0.0.0 --port 8000
+```
+
+Abra `http://localhost:8000`. A primeira tela usa somente dados sintéticos, identificados
+como tal. O app consulta o BCB SGS 1 e a PAM/IBGE 1612 quando os domínios oficiais estão
+liberados. Para habilitar a V8 local, configure `AGRO_V8_SQLITE` com o caminho de um
+SQLite V8 autorizado; não exponha dados FAO/CONAB antes da revisão de licença.
+Veja [fontes e contrato do webapp](docs/WEBAPP.md) para estado dos conectores e limites.
 
 ## Migrar para GitHub / Codex
 
